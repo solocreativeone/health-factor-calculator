@@ -1,0 +1,36 @@
+{
+  "name": "calculate_health_factor",
+  "version": "1.0.0",
+  "description": "Calculates Aave-style lending position health factor, liquidation price, and risk label given collateral and debt assets.",
+  "endpoint": {
+    "url": "https://health-factor-asp-production.up.railway.app/health-factor",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "collateral": {
+        "type": "object",
+        "description": "Collateral details object",
+        "properties": {
+          "asset": { "type": "string", "description": "Symbol of deposited collateral (e.g. 'ETH')" },
+          "amount": { "type": "number", "description": "Quantity of collateral deposited (e.g. 2.0)" }
+        },
+        "required": ["asset", "amount"]
+      },
+      "debt": {
+        "type": "object",
+        "description": "Debt details object",
+        "properties": {
+          "asset": { "type": "string", "description": "Symbol of borrowed debt asset (e.g. 'USDT')" },
+          "amount": { "type": "number", "description": "Quantity of debt borrowed (e.g. 3000.0)" }
+        },
+        "required": ["asset", "amount"]
+      }
+    },
+    "required": ["collateral", "debt"]
+  }
+}

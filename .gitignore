@@ -1,0 +1,8 @@
+__pycache__/
+venv/
+*.pyc
+*.tar.gz
+session_b64.txt
+.env
+*.log
+.DS_Store
