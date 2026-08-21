@@ -1,9 +1,25 @@
-# Health Factor Calculator (A2MCP Service)
+# Health Factor Calculator
 
-A lightweight API that computes DeFi lending health factor, liquidation
-price, and risk level for a collateral/debt position. Built for OKX.AI
-as an Agent-to-MCP (A2MCP) service - no negotiation, callers hit the
-endpoint and get a result back.
+A DeFi lending risk API, deployed as an Agent Service Provider (ASP) on
+OKX.AI. Computes health factor, liquidation price, and risk level for a
+collateral/debt position. Registered as an agent-to-agent (A2A) service:
+tasks are negotiated and fulfilled through a persistent daemon connected
+to OKX's Onchain OS, rather than a direct public endpoint.
+
+## Live Listing
+
+Approved and listed on OKX.AI during the Genesis Hackathon.
+
+![OKX.AI Listing](./listing-overview.png)
+
+**Agent ID:** #5746 | **Rating:** 5.0 ⭐ (1 review) | **Network:** X Layer
+
+> "Task completed successfully" - DeFi User ⭐⭐⭐⭐⭐
+
+![On-chain data](./onchain-data.png)
+
+*Note: the live daemon has since been taken offline post-hackathon. This
+reflects the project's approved, active state during the hackathon.*
 
 ## What it does
 
@@ -14,7 +30,17 @@ Given a collateral position and a debt position, returns:
 - **Risk level**: Safe / Caution / Danger
 - Which price source was used (live CoinGecko lookup, or a caller-supplied override)
 
-## Run it locally
+## Architecture
+
+Two components, deployed separately:
+
+1. **`main.py`** (this repo) - the core calculation API, built with FastAPI.
+2. **A2A daemon** (`okx-a2a` / `onchainos` CLI) - a persistent process that
+   authenticates with an Onchain OS wallet, stays online 24/7, and handles
+   incoming task negotiation on OKX's A2A protocol. When a task comes in,
+   the daemon calls the logic in this API to produce the result.
+
+## Run the API locally
 
 ```bash
 pip install -r requirements.txt
@@ -64,9 +90,7 @@ BTC, WBTC, USDT, USDC, DAI).
 
 Simple liveness check, returns `{"status": "ok"}`.
 
-## Deploying (pick one — both have free tiers)
-
-### Option A: Railway
+## Deploying the API
 
 ```bash
 npm install -g @railway/cli
@@ -78,29 +102,9 @@ railway up
 Railway auto-detects the Python app from `requirements.txt` and gives you
 a public URL.
 
-### Option B: Render
-
-1. Push this folder to a GitHub repo.
-2. On render.com, create a new **Web Service**, connect the repo.
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-
-Either way, once deployed you'll have a public URL like
-`https://your-service.up.railway.app/health-factor` — that's what you
-register as your A2MCP endpoint on OKX.AI.
-
-## Before registering on OKX.AI
-
-- [ ] Confirm the deployed URL responds correctly (test with curl or `/docs`)
-- [ ] Decide free vs. paid tier (free = no x402 integration needed, faster to ship)
-- [ ] Double-check liquidation threshold defaults against current Aave v3
-      parameters if you want to publicize this as trustworthy for real
-      positions — the defaults here are reasonable approximations, not
-      pulled from a live protocol feed
-- [ ] Register as A2MCP per the OKX.AI tutorial, then submit for listing
-
 ## Known limitation
 
 Live price lookups depend on CoinGecko's public API being reachable from
-wherever you deploy. If you want to remove that dependency, you can swap
-`fetch_price_usd()` in `main.py` for OKX's own price feed / OKLink API instead.
+wherever you deploy. Liquidation threshold defaults are approximations
+of Aave v3 parameters, not pulled live from any protocol, verify
+independently before relying on them for a real position.
